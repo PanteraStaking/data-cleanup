@@ -38,7 +38,17 @@ chmod +x /home/phil-mainnet/clean_disk.sh
 chown phil-mainnet:phil-mainnet /home/phil-mainnet/clean_disk.sh
 ```
 
-### 4. Schedule the cron job
+### 4. Create log folder
+
+Create the log folder and set proper permissions:
+
+```bash
+mkdir -p /home/phil-mainnet/log
+chown phil-mainnet:phil-mainnet /home/phil-mainnet/log
+chmod 755 /home/phil-mainnet/log
+```
+
+### 5. Schedule the cron job
 
 Edit your user's crontab:
 
@@ -52,7 +62,7 @@ Add this line to run the script every Friday at 16:10 (4:10 PM):
 10 16 * * 5 /home/phil-mainnet/clean_disk.sh >> /home/phil-mainnet/log/oraid_snapshot.log 2>&1
 ```
 
-### 5. Confirm cron job logs and troubleshooting
+### 6. Confirm cron job logs and troubleshooting
 
 After the scheduled run time, check the log files for output and errors:
 
