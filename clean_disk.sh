@@ -38,7 +38,7 @@ monitor_sync() {
 
     if [[ "$STATUS_OUTPUT" == "error" ]]; then
       # Capture journal logs (last 10 minutes)
-      LOG_OUTPUT=$(sudo journalctl -fu orai-phil -o cat --since "10 minutes ago" 2>/dev/null | tail -n 40)
+      LOG_OUTPUT=$(sudo journalctl -u orai-phil -o cat --since "10 minutes ago" | tail -n 40)
 
       # Truncate or sanitize if too long
       if [[ ${#LOG_OUTPUT} -gt 3500 ]]; then
