@@ -32,11 +32,23 @@ send_telegram_message() {
 
 monitor_sync() {
   send_telegram_message "🔄 Monitoring sync progress every 10 minutes..."
+
   while true; do
     STATUS_OUTPUT=$(oraid status 2>/dev/null || echo "error")
+
     if [[ "$STATUS_OUTPUT" == "error" ]]; then
-      send_telegram_message "❌ Failed to retrieve \`oraid status\`. Stopping monitoring."
-      break
+      # Capture journal logs (last 10 minutes)
+      LOG_OUTPUT=$(sudo journalctl -fu orai-phil -o cat --since "10 minutes ago" 2>/dev/null | tail -n 40)
+
+      # Truncate or sanitize if too long
+      if [[ ${#LOG_OUTPUT} -gt 3500 ]]; then
+        LOG_OUTPUT="${LOG_OUTPUT:0:3500}\n...(truncated)"
+      fi
+
+      # Send error with logs
+      send_telegram_message "❌ *Failed to retrieve \`oraid status\`.* Retrying in 10 minutes.\n\n🧾 *Recent logs:*\n\`\`\`\n$LOG_OUTPUT\n\`\`\`"
+      sleep 600
+      continue
     fi
 
     CATCHING_UP=$(echo "$STATUS_OUTPUT" | jq -r '.sync_info.catching_up')
@@ -49,7 +61,7 @@ monitor_sync() {
       send_telegram_message "📡 Still syncing... current block: *$BLOCK_HEIGHT*"
     fi
 
-    sleep 600  # Wait 10 minutes
+    sleep 600  # Wait 10 minutes before checking again
   done
 }
 
